@@ -15,7 +15,7 @@ const pool = mysql.createPool({
 });
 
 // Helper to match the previous PG interface: query(text, params)
-export const query = async (sql: string, params?: any[]) => {
+export const query = async (sql: string, params?: any[]): Promise<{ rows: any[]; insertId: number | null }> => {
   const [result] = await pool.execute(sql, params || []);
   
   // If it's a SELECT, result is an array. If it's an INSERT/UPDATE, result is a ResultSetHeader object.

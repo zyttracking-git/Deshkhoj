@@ -99,15 +99,15 @@ export default function Home() {
       {/* ── HERO ── */}
       <section className="relative min-h-[620px] flex items-center overflow-hidden pt-20 pb-20">
         {/* Background Image with Overlay */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 bg-zinc-950">
           <Image
-            src="/illustrations/hero_bazaar.png"
+            src="/illustrations/hero_bazaar_hd.png"
             alt="DeshKhoj Hero Background"
             fill
-            className="object-cover object-center"
+            className="object-cover object-center opacity-70 scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/65" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/85" />
         </div>
 
         <div className="container relative mx-auto px-4 md:px-6 z-10 text-center">

@@ -19,7 +19,7 @@ export const query = async (sql: string, params?: any[]) => {
   const [result] = await pool.execute(sql, params || []);
   
   // If it's a SELECT, result is an array. If it's an INSERT/UPDATE, result is a ResultSetHeader object.
-  const rows = Array.isArray(result) ? result : [];
+  const rows = Array.isArray(result) ? (result as any[]) : [];
   const insertId = !Array.isArray(result) ? (result as any).insertId : null;
   
   return { rows, insertId };

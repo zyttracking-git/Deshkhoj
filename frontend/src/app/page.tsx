@@ -66,7 +66,7 @@ const STORY_CARDS = [
     subtitle: "सीधे जुड़ें",
     desc: "No middlemen. Customers reach you directly — on call or WhatsApp, the way India actually works.",
     img: "/illustrations/story_connect.png",
-    accentColor: "#6bb947",
+    accentColor: "#22c55e",
   },
   {
     title: "Support Local, Grow Local",
@@ -264,19 +264,23 @@ export default function Home() {
               </div>
 
               {/* Text at bottom */}
-              <div className="absolute bottom-0 left-0 right-0 p-7 z-10">
-                <p
-                  className="text-xs font-black uppercase tracking-[0.2em] mb-2"
-                  style={{ color: card.accentColor }}
-                >
-                  {card.subtitle}
-                </p>
-                <h3 className="text-xl font-black text-white mb-2 leading-tight">
-                  {card.title}
-                </h3>
-                <p className="text-sm font-medium text-white/90 leading-relaxed max-w-xs opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                  {card.desc}
-                </p>
+              <div className="absolute bottom-0 left-0 right-0 p-7 z-10 flex flex-col justify-end min-h-[160px]">
+                <div className="min-h-[60px] flex flex-col justify-end">
+                  <p
+                    className="text-xs font-black uppercase tracking-[0.2em] mb-1 leading-tight"
+                    style={{ color: card.accentColor, textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
+                  >
+                    {card.subtitle}
+                  </p>
+                  <h3 className="text-xl font-black text-white mb-2 leading-tight">
+                    {card.title}
+                  </h3>
+                </div>
+                <div className="h-[60px]"> {/* Fixed height for description area to prevent shifting */}
+                  <p className="text-sm font-medium text-white/90 leading-relaxed max-w-xs opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                    {card.desc}
+                  </p>
+                </div>
               </div>
 
               {/* Divider between cards */}
@@ -406,7 +410,7 @@ export default function Home() {
             <svg width="100%" height="100%"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#grid)"/></svg>
           </div>
 
-          <div className="relative z-10 grid md:grid-cols-[1fr_auto] items-center gap-8 p-10 sm:p-14">
+          <div className="relative z-10 max-w-5xl mx-auto grid md:grid-cols-[1fr_auto] items-center gap-12 p-10 sm:p-14">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-400 mb-3">अपना व्यापार बढ़ाएं</p>
               <h2 className="text-3xl font-black tracking-tighter text-white sm:text-5xl leading-tight">
@@ -422,7 +426,7 @@ export default function Home() {
                 Get Started for Free →
               </button>
             </div>
-            <div className="hidden md:block w-56 lg:w-72 flex-shrink-0 self-end">
+            <div className="hidden md:block w-56 lg:w-64 flex-shrink-0 self-end">
               <Image
                 src="/illustrations/register_shopowner.png"
                 alt="A friendly Indian shop owner ready to list their business"

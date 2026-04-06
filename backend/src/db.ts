@@ -23,7 +23,7 @@ if (isMySQL) {
   console.log('Using PostgreSQL Pool');
 }
 
-export const query = async (text: string, params?: any[]): Promise<{ rows: any[]; insertId: number | null }> => {
+export const query = async (text: string, params: any[] = []): Promise<{ rows: any[]; insertId: number | null }> => {
   if (mysqlPool) {
     // MySQL uses ? placeholders natively
     const [rows, fields] = await mysqlPool.execute(text, params);

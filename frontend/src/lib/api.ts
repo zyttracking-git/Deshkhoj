@@ -105,7 +105,8 @@ export const api = {
       get: (id: number | string) => apiFetch<{ success: boolean; data: Review[] }>(`/businesses/${id}/reviews`),
       add: (id: number | string, body: { user_name: string; rating: number; comment: string }) =>
         apiFetch(`/businesses/${id}/reviews`, { method: 'POST', body: JSON.stringify(body) }),
-    }
+    },
+    getStats: () => apiFetch<{ success: boolean; data: { totalBusinesses: number; activeBusinesses: number; users: number; pending: number; products: number; states: number; towns: number } }>('/businesses/stats')
   },
 
   // ---------- Products ----------

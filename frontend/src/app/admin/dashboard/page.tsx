@@ -38,6 +38,10 @@ export default function AdminDashboard() {
   const [pendingItems, setPendingItems] = useState<any[]>([]);
   const [allItems, setAllItems] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'pending' | 'all'>('pending');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+
   const [approvingId, setApprovingId] = useState<number | null>(null);
   const [adminSearch, setAdminSearch] = useState("");
 
@@ -63,8 +67,14 @@ export default function AdminDashboard() {
         const pendingRes = await api.admin.pendingRegistrations(token);
         if (pendingRes.success) setPendingItems(pendingRes.data);
 
-        const allRes = await api.admin.businesses(token);
-        if (allRes.success) setAllItems(allRes.data);
+        const allRes = await api.admin.businesses(token, page);
+        if (allRes.success) {
+          setAllItems(allRes.data);
+          if ((allRes as any).meta) {
+            setTotalPages((allRes as any).meta.totalPages);
+            setTotalRecords((allRes as any).meta.total);
+          }
+        }
       } catch (err) {
         console.error("Fetch error:", err);
       } finally {
@@ -73,7 +83,7 @@ export default function AdminDashboard() {
     };
 
     fetchData();
-  }, [router]);
+  }, [router, page]);
 
   const handleAction = async (id: number, action: 'approve' | 'reject') => {
     setApprovingId(id);
@@ -259,7 +269,7 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab('all')}
                 className={`pb-2 text-sm font-bold transition-all ${activeTab === 'all' ? 'text-primary border-b-2 border-primary' : 'text-foreground/40 hover:text-foreground/60'}`}
                >
-                 All Records ({allItems.length})
+                 All Records ({totalRecords})
                </button>
             </div>
             
@@ -321,6 +331,28 @@ export default function AdminDashboard() {
                     ))
                   )}
                 </motion.div>
+              )}
+
+              {activeTab === 'all' && totalPages > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-8 pb-4">
+                  <button
+                    disabled={page === 1}
+                    onClick={() => setPage(p => p - 1)}
+                    className="rounded-lg border border-card-border px-4 py-2 text-sm font-bold disabled:opacity-40 hover:bg-card-border/20 transition-all"
+                  >
+                    ← Previous
+                  </button>
+                  <div className="text-sm font-bold text-foreground/60">
+                     Page {page} of {totalPages}
+                  </div>
+                  <button
+                    disabled={page >= totalPages}
+                    onClick={() => setPage(p => p + 1)}
+                    className="rounded-lg border border-card-border px-4 py-2 text-sm font-bold disabled:opacity-40 hover:bg-card-border/20 transition-all"
+                  >
+                    Next →
+                  </button>
+                </div>
               )}
             </AnimatePresence>
           </div>

@@ -20,6 +20,7 @@ export default function BusinessDetail() {
   const [loading, setLoading] = useState(true);
   const [reviewForm, setReviewForm] = useState({ user_name: "", rating: 5, comment: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -44,9 +45,16 @@ export default function BusinessDetail() {
       const bid = Array.isArray(id) ? id[0] : id;
       if (!bid) return;
       await api.businesses.reviews.add(bid, reviewForm);
-      const reviewsRes = await api.businesses.reviews.get(bid);
+      // Refresh both reviews AND business data so avg_rating badge updates instantly
+      const [bizRes, reviewsRes] = await Promise.all([
+        api.businesses.getById(bid),
+        api.businesses.reviews.get(bid)
+      ]);
+      setBiz(bizRes.data);
       setReviews(reviewsRes.data);
       setReviewForm({ user_name: "", rating: 5, comment: "" });
+      setReviewSuccess(true);
+      setTimeout(() => setReviewSuccess(false), 3000);
     } catch (err) {
       console.error(err);
     } finally {
@@ -261,13 +269,26 @@ export default function BusinessDetail() {
                     onChange={e => setReviewForm({...reviewForm, comment: e.target.value})}
                     className="w-full rounded-xl border border-card-border bg-white px-4 py-2.5 text-sm outline-none focus:border-primary"
                   />
-                  <button 
-                    type="submit" 
-                    disabled={isSubmitting}
-                    className="w-full sm:w-auto rounded-xl bg-foreground px-8 py-3 text-xs font-black text-white hover:bg-foreground/90 transition-all active:scale-95 disabled:opacity-40"
-                  >
-                    {isSubmitting ? "Postings..." : "POST REVIEW →"}
-                  </button>
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <button 
+                      type="submit" 
+                      disabled={isSubmitting}
+                      className="rounded-xl bg-foreground px-8 py-3 text-xs font-black text-white hover:bg-foreground/90 transition-all active:scale-95 disabled:opacity-40"
+                    >
+                      {isSubmitting ? "Posting..." : "POST REVIEW →"}
+                    </button>
+                    {reviewSuccess && (
+                      <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="flex items-center gap-2 rounded-xl bg-green-50 border border-green-200 px-4 py-2.5 text-xs font-bold text-green-700"
+                      >
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        Review posted! Rating updated.
+                      </motion.div>
+                    )}
+                  </div>
                 </form>
               </div>
             </div>

@@ -29,6 +29,40 @@ router.post('/upload', upload.single('image'), (req: Request, res: Response) => 
 });
 
 /**
+ * GET /api/businesses/stats
+ * Public stats for home page
+ */
+router.get('/stats', async (_req: Request, res: Response) => {
+  try {
+    const [totalBusiness, activeBusiness, users, pending, products, states, districts] = await Promise.all([
+      query("SELECT COUNT(*) as count FROM dukaan_list WHERE dukaan_name != 'Sample Shop Name'"),
+      query("SELECT COUNT(*) as count FROM dukaan_list d WHERE d.status = 'active'"),
+      query("SELECT COUNT(*) as count FROM user_list"),
+      query("SELECT COUNT(*) as count FROM dukaan_list WHERE status = 'pending'"),
+      query("SELECT COUNT(*) as count FROM dukaan_products WHERE is_del = 0"),
+      query("SELECT COUNT(*) as count FROM states"),
+      query("SELECT COUNT(*) as count FROM districts"),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        totalBusinesses: parseInt(totalBusiness.rows[0]?.count || '0'),
+        activeBusinesses: parseInt(activeBusiness.rows[0]?.count || '0'),
+        users: parseInt(users.rows[0]?.count || '0'), 
+        pending: parseInt(pending.rows[0]?.count || '0'),
+        products: parseInt(products.rows[0]?.count || '0'),
+        states: parseInt(states.rows[0]?.count || '0'),
+        towns: parseInt(districts.rows[0]?.count || '0'),
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+/**
  * GET /api/businesses
  * Search and filter businesses
  */
@@ -101,8 +135,8 @@ router.get('/', async (req: Request, res: Response) => {
     const queryParams = [...params, parseInt(limit as string), offset];
     const result = await query(
       `SELECT d.*, u.state_id, u.district_id, u.block_id, u.village_id,
-              (SELECT COALESCE(AVG(rating), 0) FROM dukaan_reviews WHERE shop_id = d.id) as avg_rating,
-              (SELECT COUNT(*) FROM dukaan_reviews WHERE shop_id = d.id) as review_count
+              (SELECT COALESCE(AVG(rating), 0)::FLOAT FROM dukaan_reviews WHERE shop_id = d.id) as avg_rating,
+              (SELECT COUNT(*)::INT FROM dukaan_reviews WHERE shop_id = d.id) as review_count
        FROM dukaan_list d 
        LEFT JOIN user_list u ON d.user_id = u.id 
        ${whereClause} 
@@ -135,8 +169,8 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const dukaanResult = await query(
       `SELECT d.*, u.state_id, u.district_id, u.block_id, u.village_id,
-              (SELECT COALESCE(AVG(rating), 0) FROM dukaan_reviews WHERE shop_id = d.id) as avg_rating,
-              (SELECT COUNT(*) FROM dukaan_reviews WHERE shop_id = d.id) as review_count
+              (SELECT COALESCE(AVG(rating), 0)::FLOAT FROM dukaan_reviews WHERE shop_id = d.id) as avg_rating,
+              (SELECT COUNT(*)::INT FROM dukaan_reviews WHERE shop_id = d.id) as review_count
        FROM dukaan_list d
        LEFT JOIN user_list u ON d.user_id = u.id
        WHERE d.id = ?`,

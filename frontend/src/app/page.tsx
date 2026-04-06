@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ArrowRight, Search } from "lucide-react";
+import { api } from "@/lib/api";
 
 const POPULAR_CATEGORIES = [
   { name: "Cake Shop", hindi: "प्रसिद्ध उत्पाद", img: "/illustrations/cat_cake_shop.png" },
@@ -80,6 +81,25 @@ const STORY_CARDS = [
 export default function Home() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [counts, setCounts] = useState({ businesses: 0, towns: 0, states: 0 });
+
+  useEffect(() => {
+    api.businesses.getStats()
+      .then((res: any) => {
+        setCounts({
+          businesses: res.data.totalBusinesses,
+          towns: res.data.towns,
+          states: res.data.states
+        });
+      })
+      .catch(console.error);
+  }, []);
+
+  const STATS = [
+    { value: `${counts.businesses.toLocaleString()}+`, label: "Businesses Listed" },
+    { value: `${counts.towns.toLocaleString()}+`, label: "Towns Covered" },
+    { value: `${counts.states.toLocaleString()}`, label: "States" },
+  ];
 
   const handleRedirect = (query: string) => {
     router.push(`/search?q=${encodeURIComponent(query)}`);

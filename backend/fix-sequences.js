@@ -1,33 +1,23 @@
-const { Pool } = require('pg');
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-
-async function fixSequences() {
-  const tables = [
-    'states', 'districts', 'blocks', 'villages', 'product_category', 
-    'measure_unit', 'user_list', 'dukaan_list', 'dukaan_photos', 
-    'dukaan_products', 'new_reg_form_list', 'new_reg_job_cv', 'new_reg_prod_list'
-  ];
+require('dotenv').config();
+const { Client } = require('pg');
+async function run() {
+  const c = new Client({connectionString: process.env.DATABASE_URL});
+  await c.connect();
+  
+  // Fix all sequences for all tables
+  const tables = ['dukaan_list', 'user_list', 'dukaan_products', 'dukaan_reviews', 'dukaan_photos'];
   
   for (const table of tables) {
     try {
-      const res = await pool.query(`SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM ${table}`);
-      const nextId = parseInt(res.rows[0].next_id);
-      const seqName = `${table}_id_seq`;
-      
-      // Ensure the sequence matches the current max id
-      await pool.query(`SELECT setval('${seqName}', ${nextId}, false)`);
-      console.log(`✅ Updated ${seqName} to ${nextId}`);
-    } catch (err) {
-      console.log(`❌ Failed for ${table}: ${err.message}`);
+      await c.query(`SELECT setval(pg_get_serial_sequence('${table}', 'id'), COALESCE(MAX(id), 1)) FROM ${table}`);
+      const res = await c.query(`SELECT last_value FROM ${table}_id_seq`);
+      console.log(`${table}: sequence reset to ${res.rows[0].last_value}`);
+    } catch(e) {
+      console.log(`${table}: skipped (${e.message.split('\n')[0]})`);
     }
   }
-  process.exit(0);
+  
+  await c.end();
+  console.log('\nAll sequences fixed!');
 }
-
-fixSequences().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+run();
